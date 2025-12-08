@@ -34,3 +34,7 @@ type FilterParams = {
     filterType: FilterOption
     authorFilter?: string
 }
+
+type CreateQuoteProps = {
+    onQuoteAdded?: (quote: Quote) => void
+}

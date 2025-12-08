@@ -21,7 +21,7 @@ import { MessageCirclePlus, Sparkles, QuoteIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { cn } from '@/lib/utils'
 
-export default function CreateQuote() {
+export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 	const [author, setAuthor] = useState('')
 	const [quote, setQuote] = useState('')
 	const [isPending, startTransition] = useTransition()
@@ -35,8 +35,8 @@ export default function CreateQuote() {
 
 	const create = async (formData: FormData) => {
 		try {
-			const quote = formData.get('quote') as string
-			const author = formData.get('author') as string
+			const quoteText = formData.get('quote') as string
+			const authorText = formData.get('author') as string
 
 			startTransition(async () => {
 				let id = session?.user?.id
@@ -47,12 +47,18 @@ export default function CreateQuote() {
 					id = updatedSession?.data?.user?.id
 				}
 
-				await saveData(quote, author, id as string)
-				toast.success('✨ Quote added successfully!')
-				setOpen(false)
-				router.refresh()
-				setAuthor('')
-				setQuote('')
+				const newQuote = await saveData(quoteText, authorText, id as string)
+				if (newQuote) {
+					toast.success('✨ Quote added successfully!')
+					if (onQuoteAdded) {
+						onQuoteAdded(newQuote as Quote)
+					}
+					setOpen(false)
+					setAuthor('')
+					setQuote('')
+				} else {
+					toast.error('Failed to add quote. Please try again.')
+				}
 			})
 		} catch (error) {
 			console.error(error)

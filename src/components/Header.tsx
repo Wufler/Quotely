@@ -5,11 +5,13 @@ import Profile from './Profile'
 
 export default function Header({
 	onFilterChange,
+	onQuoteAdded,
 }: {
 	onFilterChange: (filters: {
 		filterType: FilterOption
 		sortBy: SortOption
 	}) => void
+	onQuoteAdded?: (quote: Quote) => void
 }) {
 	return (
 		<div className="sticky top-0 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40 border-b">
@@ -27,7 +29,7 @@ export default function Header({
 					</div>
 
 					<div className="flex items-center gap-3">
-						<CreateQuote />
+						<CreateQuote onQuoteAdded={onQuoteAdded} />
 						<Profile />
 					</div>
 				</div>

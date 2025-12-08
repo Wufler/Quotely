@@ -30,6 +30,10 @@ export default function Quotes({ data }: { data: Quote[] }) {
 		setQuotes(prevQuotes => prevQuotes.filter(quote => quote.id !== quoteId))
 	}
 
+	const addQuote = (newQuote: Quote) => {
+		setQuotes(prevQuotes => [newQuote, ...prevQuotes])
+	}
+
 	const handleFilterChange = useCallback(
 		async (filters: { filterType: FilterOption; sortBy: SortOption }) => {
 			startTransition(async () => {
@@ -76,7 +80,7 @@ export default function Quotes({ data }: { data: Quote[] }) {
 
 	return (
 		<div className="min-h-screen flex flex-col bg-slate-50 dark:bg-zinc-950">
-			<Header onFilterChange={handleFilterChange} />
+			<Header onFilterChange={handleFilterChange} onQuoteAdded={addQuote} />
 
 			<div className="container mx-auto h-full p-4 py-6 flex-grow grid md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 content-start">
 				{isFilterLoading ? (

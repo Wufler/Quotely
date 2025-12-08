@@ -1,6 +1,9 @@
 'use server'
-import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
+
+import { checkBotId } from 'botid/server'
+import { Prisma } from "@/generated/prisma/client"
+import prisma from "@/lib/prisma"
+import { revalidatePath } from "next/cache"
 
 export async function getData() {
     return await prisma.quotes.findMany({
@@ -11,22 +14,38 @@ export async function getData() {
 }
 
 export async function saveData(quote: string, author: string, id: string) {
+    const verification = await checkBotId();
+    
+    if (verification.isBot) {
+        throw new Error('Access denied');
+    }
+    
     try {
-        await prisma.quotes.create({
+        const newQuote = await prisma.quotes.create({
             data: {
                 author,
                 quote,
                 userId: id
+            },
+            include: {
+                user: true
             }
         })
-        return 'Saved Quote'
+        revalidatePath('/')
+        return newQuote
     } catch (error) {
         console.log(error)
-        return 'Something went wrong'
+        return null
     }
 }
 
 export async function deleteData(id: number) {
+    const verification = await checkBotId();
+    
+    if (verification.isBot) {
+        throw new Error('Access denied');
+    }
+    
     try {
         await prisma.quotes.delete({
             where: { id }
@@ -39,6 +58,12 @@ export async function deleteData(id: number) {
 }
 
 export async function incrementLikes(id: number, userId: string) {
+    const verification = await checkBotId();
+    
+    if (verification.isBot) {
+        throw new Error('Access denied');
+    }
+    
     try {
         return await prisma.$transaction(async (tx) => {
             const existingVote = await tx.quoteLike.findUnique({
@@ -96,6 +121,12 @@ export async function incrementLikes(id: number, userId: string) {
 }
 
 export async function decrementLikes(id: number, userId: string) {
+    const verification = await checkBotId();
+    
+    if (verification.isBot) {
+        throw new Error('Access denied');
+    }
+    
     try {
         return await prisma.$transaction(async (tx) => {
             const existingVote = await tx.quoteLike.findUnique({
@@ -201,6 +232,12 @@ export async function getFilteredData(filter: FilterParams, sort: SortOption) {
 }
 
 export async function deleteAccount(userId: string) {
+    const verification = await checkBotId();
+    
+    if (verification.isBot) {
+        throw new Error('Access denied');
+    }
+    
     await prisma.user.delete({
         where: { id: userId }
     })
