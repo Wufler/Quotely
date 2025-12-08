@@ -18,7 +18,6 @@ import {
 	DialogFooter,
 } from '@/components/ui/dialog'
 import { MessageCirclePlus, Sparkles, QuoteIcon } from 'lucide-react'
-import { motion } from 'motion/react'
 import { cn } from '@/lib/utils'
 
 export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
@@ -84,18 +83,9 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 							<Sparkles className="size-5 text-primary" />
 							Create an Inspiring Quote
 						</DialogTitle>
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.3 }}
-						>
+						<div>
 							<form action={create} className="space-y-6 mt-4">
-								<motion.div
-									className="space-y-2"
-									initial={{ opacity: 0, x: -20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.1 }}
-								>
+								<div className="space-y-2">
 									<Label
 										htmlFor="author"
 										className="text-sm font-medium  flex items-center gap-2"
@@ -122,14 +112,9 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 										</span>
 										/40 characters
 									</div>
-								</motion.div>
+								</div>
 
-								<motion.div
-									className="space-y-2"
-									initial={{ opacity: 0, x: -20 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.2 }}
-								>
+								<div className="space-y-2">
 									<Label
 										htmlFor="quote"
 										className="text-sm font-medium flex items-center gap-2"
@@ -169,14 +154,10 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 										</span>
 										/255 characters
 									</div>
-								</motion.div>
+								</div>
 
 								{(!session || session?.user?.isAnonymous) && (
-									<motion.div
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										transition={{ delay: 0.3 }}
-									>
+									<div>
 										<Alert className="bg-primary/5 border-primary/20">
 											<AlertDescription className="text-sm">
 												✨ Sign in to access your quotes across all your devices.
@@ -187,7 +168,7 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 												</div>
 											)}
 										</Alert>
-									</motion.div>
+									</div>
 								)}
 
 								<DialogFooter>
@@ -210,7 +191,7 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 									</Button>
 								</DialogFooter>
 							</form>
-						</motion.div>
+						</div>
 					</DialogHeader>
 				</DialogContent>
 			</Dialog>
