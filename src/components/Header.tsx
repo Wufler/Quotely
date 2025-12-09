@@ -14,26 +14,38 @@ export default function Header({
 	onQuoteAdded?: (quote: Quote) => void
 }) {
 	return (
-		<div className="sticky top-0 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40 border-b">
-			<div className="container mx-auto py-3 px-4">
-				<div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-					<div className="flex flex-col sm:flex-row items-center gap-3">
-						<div className="flex items-center gap-2">
-							<Link href="https://github.com/WoIfey/Quotely" target="_blank">
-								<h2 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
-									Quotely
-								</h2>
-							</Link>
-						</div>
-						<QuoteFilters onFilterChange={onFilterChange} />
+		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+			<div className="container mx-auto px-4">
+				<div className="flex h-16 items-center justify-between">
+					<div className="flex items-center gap-2">
+						<Link
+							href="/"
+							className="flex items-center gap-2 transition-colors hover:opacity-90"
+						>
+							<span className="text-xl font-bold tracking-tight">Quotely</span>
+						</Link>
 					</div>
 
-					<div className="flex items-center gap-3">
+					<div className="hidden md:flex items-center gap-6">
+						<QuoteFilters onFilterChange={onFilterChange} />
+						<div className="flex items-center gap-3 pl-6 border-l">
+							<CreateQuote onQuoteAdded={onQuoteAdded} />
+							<Profile />
+						</div>
+					</div>
+
+					<div className="flex md:hidden items-center gap-2">
 						<CreateQuote onQuoteAdded={onQuoteAdded} />
 						<Profile />
 					</div>
 				</div>
+
+				<div className="md:hidden py-3 border-t overflow-x-auto">
+					<div className="flex justify-center">
+						<QuoteFilters onFilterChange={onFilterChange} />
+					</div>
+				</div>
 			</div>
-		</div>
+		</header>
 	)
 }

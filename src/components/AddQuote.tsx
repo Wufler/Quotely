@@ -1,6 +1,5 @@
 'use client'
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { saveData } from '@/app/actions'
 import { authClient } from '@/lib/auth-client'
 import { Button } from './ui/button'
@@ -8,7 +7,7 @@ import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
 import { Label } from './ui/label'
 import { toast } from 'sonner'
-import { Alert, AlertDescription } from './ui/alert'
+import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import {
 	Dialog,
 	DialogContent,
@@ -18,14 +17,12 @@ import {
 	DialogFooter,
 } from '@/components/ui/dialog'
 import { MessageCirclePlus, Loader2, Quote } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 	const [author, setAuthor] = useState('')
 	const [quote, setQuote] = useState('')
 	const [isPending, startTransition] = useTransition()
 	const [open, setOpen] = useState(false)
-	const router = useRouter()
 	const { data: session } = authClient.useSession()
 
 	const anonymousSignIn = async () => {
@@ -83,9 +80,9 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 				<DialogTrigger asChild>
 					<Button
 						variant="ghost"
-						className="[&_svg]:size-6 size-10 relative rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+						className="size-10 relative rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
 					>
-						<MessageCirclePlus className="" />
+						<MessageCirclePlus className="size-5" />
 						<span className="sr-only">Create new quote</span>
 					</Button>
 				</DialogTrigger>
@@ -112,7 +109,7 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 										value={author}
 										onChange={e => setAuthor(e.target.value)}
 										required
-										className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 text-black dark:text-white"
+										className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 text-black dark:text-white wrap-anywhere"
 									/>
 									<div className="text-xs text-muted-foreground transition-colors flex items-center">
 										<span
@@ -145,11 +142,7 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 											value={quote}
 											required
 											onChange={e => setQuote(e.target.value)}
-											className={cn(
-												'min-h-[120px] transition-all duration-200',
-												'focus:ring-2 focus:ring-primary/20 resize-none',
-												'text-black dark:text-white pl-6 pr-6'
-											)}
+											className="min-h-[120px] transition-all duration-200 focus:ring-2 focus:ring-primary/20 resize-none text-black dark:text-white pl-6 pr-6 wrap-anywhere"
 										/>
 										<span className="absolute right-3 top-3 text-muted-foreground">
 											&rdquo;
@@ -168,18 +161,16 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 								</div>
 
 								{(!session || session?.user?.isAnonymous) && (
-									<div>
-										<Alert className="bg-primary/5 border-primary/20">
-											<AlertDescription className="text-sm">
-												✨ Sign in to access your quotes across all your devices.
+									<Alert className="bg-primary/5 border-primary/20">
+										<AlertTitle className="text-sm">
+											✨ Sign in to access your quotes across all your devices.
+										</AlertTitle>
+										{!session?.user?.isAnonymous && (
+											<AlertDescription className="text-xs text-muted-foreground">
+												Publishing a quote now will sign you in anonymously.
 											</AlertDescription>
-											{!session?.user?.isAnonymous && (
-												<div className="text-xs text-muted-foreground">
-													Publishing a quote now will sign you in anonymously.
-												</div>
-											)}
-										</Alert>
-									</div>
+										)}
+									</Alert>
 								)}
 
 								<DialogFooter>

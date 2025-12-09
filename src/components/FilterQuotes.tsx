@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
 	Select,
 	SelectContent,
@@ -18,28 +18,31 @@ const defaultFilters: FilterState = {
 	sortBy: 'default',
 }
 
+function getInitialFilters(): FilterState {
+	if (typeof window === 'undefined') return defaultFilters
+
+	const savedFilters = localStorage.getItem('quoteFilters')
+	if (savedFilters) {
+		try {
+			const parsed = JSON.parse(savedFilters)
+			return {
+				filterType: parsed.filterType || defaultFilters.filterType,
+				sortBy: parsed.sortBy || defaultFilters.sortBy,
+			}
+		} catch (error) {
+			console.error('Error parsing saved filters:', error)
+			localStorage.removeItem('quoteFilters')
+		}
+	}
+	return defaultFilters
+}
+
 export default function QuoteFilters({
 	onFilterChange,
 }: {
 	onFilterChange: (filters: FilterState) => void
 }) {
-	const [filters, setFilters] = useState<FilterState>(defaultFilters)
-
-	useEffect(() => {
-		const savedFilters = localStorage.getItem('quoteFilters')
-		if (savedFilters) {
-			try {
-				const parsed = JSON.parse(savedFilters)
-				setFilters({
-					filterType: parsed.filterType || defaultFilters.filterType,
-					sortBy: parsed.sortBy || defaultFilters.sortBy,
-				})
-			} catch (error) {
-				console.error('Error parsing saved filters:', error)
-				localStorage.removeItem('quoteFilters')
-			}
-		}
-	}, [])
+	const [filters, setFilters] = useState<FilterState>(getInitialFilters)
 
 	const handleFilterChange = (newFilters: Partial<FilterState>) => {
 		const updatedFilters = { ...filters, ...newFilters }

@@ -6,6 +6,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
@@ -23,7 +24,7 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog'
 import Google from './ui/google'
-import Github from './ui/github'
+import GitHub from './ui/github'
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -70,64 +71,73 @@ export default function Profile() {
 		return (
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" className="size-10 rounded-full p-0">
-						<Avatar className="size-10 [&_svg]:size-5">
+					<Button
+						variant="ghost"
+						className="size-10 rounded-full p-0 hover:bg-transparent"
+					>
+						<Avatar className="size-9 border border-border/50 transition-transform hover:scale-105">
 							<AvatarImage
 								src={session.user?.image || ''}
 								alt={session.user?.name || ''}
 							/>
-							<AvatarFallback>
-								<User />
+							<AvatarFallback className="bg-muted/50">
+								<User className="size-4 text-muted-foreground" />
 							</AvatarFallback>
 						</Avatar>
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-56">
+				<DropdownMenuContent align="end" className="w-64 p-2">
 					<DropdownMenuLabel className="font-normal">
 						<div className="flex flex-col space-y-1">
-							<p className="text-sm font-medium leading-none">{session.user?.name}</p>
+							<p className="text-sm font-semibold leading-none">
+								{session.user?.name}
+							</p>
 							<p className="text-xs leading-none text-muted-foreground truncate">
 								{session.user?.email}
 							</p>
 						</div>
 					</DropdownMenuLabel>
+					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						onClick={e => {
 							e.preventDefault()
 							setTheme(resolvedTheme === 'light' ? 'dark' : 'light')
 						}}
-						className="flex items-center justify-between cursor-pointer"
+						className="flex items-center justify-between cursor-pointer py-2 my-2"
 					>
-						<span className="flex items-center gap-2">Theme</span>
-						<span className="relative size-6">
-							<Sun
-								className={`absolute top-1 left-0 size-6 text-yellow-500 transition-opacity duration-300 ${
-									resolvedTheme === 'light' ? 'opacity-100' : 'opacity-0'
-								}`}
-							/>
-							<Moon
-								className={`absolute top-1 left-0 size-6 text-blue-500 transition-opacity duration-300 ${
-									resolvedTheme === 'dark' ? 'opacity-100' : 'opacity-0'
-								}`}
-							/>
+						<span className="flex items-center gap-2">
+							{resolvedTheme === 'light' ? (
+								<Sun className="size-4 text-orange-500" />
+							) : (
+								<Moon className="size-4 text-blue-500" />
+							)}
+							Appearance
+						</span>
+						<span className="text-xs text-muted-foreground capitalize">
+							{resolvedTheme}
 						</span>
 					</DropdownMenuItem>
+					<DropdownMenuSeparator />
 					{session?.user?.isAnonymous && (
 						<>
+							<div className="px-1.5 py-1.5 text-xs font-semibold text-muted-foreground">
+								Link Account
+							</div>
 							<DropdownMenuItem
 								onClick={googleSignIn}
-								className="flex items-center gap-2"
+								className="flex items-center gap-2 py-2"
 							>
 								<Google />
 								Link with Google
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								onClick={githubSignIn}
-								className="flex items-center gap-2"
+								className="flex items-center gap-2 py-2"
 							>
-								<Github className="invert dark:invert-0" />
+								<GitHub className="invert dark:invert-0" />
 								Link with GitHub
 							</DropdownMenuItem>
+							<DropdownMenuSeparator />
 						</>
 					)}
 					{session?.user?.isAnonymous ? (
@@ -135,7 +145,7 @@ export default function Profile() {
 							<AlertDialogTrigger asChild>
 								<DropdownMenuItem
 									onSelect={e => e.preventDefault()}
-									className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+									className="text-destructive focus:text-destructive focus:bg-destructive/10 py-2"
 								>
 									<LogOut className="size-4" />
 									Sign out
@@ -153,7 +163,10 @@ export default function Profile() {
 								</AlertDialogHeader>
 								<AlertDialogFooter>
 									<AlertDialogCancel>Cancel</AlertDialogCancel>
-									<AlertDialogAction onClick={handleDeleteAccount}>
+									<AlertDialogAction
+										onClick={handleDeleteAccount}
+										className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+									>
 										Sign out
 									</AlertDialogAction>
 								</AlertDialogFooter>
@@ -165,7 +178,7 @@ export default function Profile() {
 								<AlertDialogTrigger asChild>
 									<DropdownMenuItem
 										onSelect={e => e.preventDefault()}
-										className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+										className="text-destructive focus:text-destructive focus:bg-destructive/10 py-2 mt-2"
 									>
 										<Trash2 className="size-4" />
 										Delete Account
@@ -174,7 +187,7 @@ export default function Profile() {
 								<AlertDialogContent>
 									<AlertDialogHeader>
 										<AlertDialogTitle className="flex items-center gap-2">
-											<AlertCircle className="size-5 text-red-500" /> Are you sure?
+											<AlertCircle className="size-5 text-destructive" /> Delete Account
 										</AlertDialogTitle>
 										<AlertDialogDescription>
 											Your account will be deleted but your quotes will stay intact as
@@ -183,13 +196,16 @@ export default function Profile() {
 									</AlertDialogHeader>
 									<AlertDialogFooter>
 										<AlertDialogCancel>Cancel</AlertDialogCancel>
-										<AlertDialogAction onClick={handleDeleteAccount}>
+										<AlertDialogAction
+											onClick={handleDeleteAccount}
+											className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+										>
 											Delete Account
 										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>
 							</AlertDialog>
-							<DropdownMenuItem onClick={handleSignOut}>
+							<DropdownMenuItem onClick={handleSignOut} className="py-2">
 								<LogOut className="size-4" />
 								Sign out
 							</DropdownMenuItem>
@@ -203,46 +219,64 @@ export default function Profile() {
 	return (
 		<>
 			{isPending ? (
-				<Loader2 className="animate-spin" />
+				<Loader2 className="animate-spin size-5 text-muted-foreground" />
 			) : (
 				<Dialog>
 					<DialogTrigger asChild>
-						<Button variant="outline" size="sm">
+						<Button
+							variant="outline"
+							size="sm"
+							className="gap-2 h-9 px-4 font-medium"
+						>
 							<LogIn className="size-4" />
 							Sign In
 						</Button>
 					</DialogTrigger>
-					<DialogContent className="sm:max-w-md">
+					<DialogContent className="sm:max-w-[400px] p-6">
 						<DialogHeader>
-							<DialogTitle>Sign In</DialogTitle>
+							<DialogTitle className="font-bold tracking-tight">Sign In</DialogTitle>
 							<DialogDescription>
-								Choose either sign in method to manage your quotes
+								Manage your quotes and preferences.
 							</DialogDescription>
 						</DialogHeader>
-						<div className="flex flex-col gap-4 py-4">
+						<div className="flex flex-col gap-3">
 							<Button
 								onClick={googleSignIn}
-								className="w-full gap-2"
+								className="w-full h-11 gap-3 px-4"
 								variant="outline"
 							>
 								<Google />
-								Sign in with Google
+								Continue with Google
 							</Button>
 							<Button
 								onClick={githubSignIn}
-								className="w-full gap-2"
+								className="w-full h-11 gap-3 px-4"
 								variant="outline"
 							>
-								<Github className="invert dark:invert-0" />
-								Sign in with GitHub
+								<GitHub className="invert dark:invert-0" />
+								Continue with GitHub
 							</Button>
-							<Button onClick={anonymousSignIn} className="w-full gap-2">
+							<div className="relative my-2">
+								<div className="absolute inset-0 flex items-center">
+									<span className="w-full border-t" />
+								</div>
+								<div className="relative flex justify-center text-xs uppercase">
+									<span className="bg-background px-2 text-muted-foreground">Or</span>
+								</div>
+							</div>
+							<Button
+								onClick={anonymousSignIn}
+								className="w-full h-11 gap-3 px-4"
+								variant="secondary"
+							>
 								<User className="size-4" />
-								Continue as Anonymous
+								Anonymous
 							</Button>
 						</div>
-						<DialogFooter className="place-self-start text-xs text-muted-foreground">
-							You can continue as Anonymous without signing in
+						<DialogFooter className="sm:justify-center">
+							<p className="text-xs text-center text-muted-foreground px-4">
+								You can continue as Anonymous without signing in
+							</p>
 						</DialogFooter>
 					</DialogContent>
 				</Dialog>

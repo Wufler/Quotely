@@ -75,11 +75,11 @@ export default function Likes({
 				onClick={handleLike}
 				className={`size-8 ${
 					userVote === 1
-						? 'bg-green-500 hover:bg-green-400'
-						: 'bg-green-600 hover:bg-green-500'
+						? 'bg-green-600 hover:bg-green-800'
+						: 'bg-transparent hover:bg-green-600'
 				}`}
 			>
-				<ArrowUp className="size-4 text-white" />
+				<ArrowUp className="size-4 dark:text-white text-black" />
 			</Button>
 			<div
 				className={`flex h-8 w-14 items-center justify-center rounded-md text-sm font-medium ${
@@ -87,7 +87,7 @@ export default function Likes({
 						? 'bg-destructive text-destructive-foreground'
 						: likes > 0
 						? 'bg-green-600 text-green-50'
-						: 'bg-muted text-muted-foreground'
+						: 'dark:text-muted-foreground'
 				}`}
 			>
 				{formatLikes(likes)}
@@ -97,11 +97,11 @@ export default function Likes({
 				onClick={handleDislike}
 				className={`size-8 ${
 					userVote === -1
-						? 'bg-red-600 hover:bg-red-500'
-						: 'bg-destructive hover:bg-destructive/90'
+						? 'bg-destructive hover:bg-destructive/60'
+						: 'bg-transparent hover:bg-destructive'
 				}`}
 			>
-				<ArrowDown className="size-4 text-white" />
+				<ArrowDown className="size-4 dark:text-white text-black" />
 			</Button>
 		</div>
 	)

@@ -34,7 +34,10 @@ export default function DeleteQuote({
 	return (
 		<AlertDialog open={isOpen} onOpenChange={setIsOpen}>
 			<AlertDialogTrigger asChild>
-				<Button variant="destructive" size="icon" className="size-8">
+				<Button
+					size="icon"
+					className="size-8 bg-transparent hover:bg-destructive text-black dark:text-white"
+				>
 					<Trash2 className="size-4" />
 				</Button>
 			</AlertDialogTrigger>

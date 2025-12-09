@@ -6,7 +6,6 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getData, getFilteredData } from '@/app/actions'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { cn } from '@/lib/utils'
 import { authClient } from '@/lib/auth-client'
 import Header from './Header'
 import { Loader2 } from 'lucide-react'
@@ -132,13 +131,15 @@ export default function Quotes({
 			{ threshold: 0.1 }
 		)
 
-		if (observerTarget.current) {
-			observer.observe(observerTarget.current)
+		const currentTarget = observerTarget.current
+
+		if (currentTarget) {
+			observer.observe(currentTarget)
 		}
 
 		return () => {
-			if (observerTarget.current) {
-				observer.unobserve(observerTarget.current)
+			if (currentTarget) {
+				observer.unobserve(currentTarget)
 			}
 		}
 	}, [hasMore, isLoadingMore, isFilterLoading, loadMore])
@@ -155,7 +156,7 @@ export default function Quotes({
 		<div className="min-h-screen flex flex-col bg-slate-50 dark:bg-zinc-950">
 			<Header onFilterChange={handleFilterChange} onQuoteAdded={addQuote} />
 
-			<div className="container mx-auto h-full p-4 py-6 flex-grow grid md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 content-start">
+			<div className="container mx-auto h-full p-4 py-6 grow grid md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 content-start">
 				{isFilterLoading ? (
 					<>
 						{[...Array(quotes.length)].map((_, i) => (
@@ -180,47 +181,28 @@ export default function Quotes({
 					quotes.map(q => (
 						<Card
 							key={q.id}
-							className={cn(
-								'relative group border dark:border-gray-800',
-								'dark:bg-gradient-to-br dark:from-gray-900/50 dark:to-gray-800/50',
-								'bg-gradient-to-br from-white to-gray-50/50',
-								'flex flex-col min-h-[300px]'
-							)}
+							className="flex flex-col h-full border-border/50 bg-card/50 py-0 pt-8"
 						>
-							<CardHeader className="pb-2">
-								<div className="flex items-center gap-2">
-									<Avatar className="h-8 w-8">
-										<AvatarImage src={q.user?.image || ''} />
-										<AvatarFallback>{q.user?.name?.[0] || '?'}</AvatarFallback>
-									</Avatar>
-									<div className="flex flex-col">
-										<span className="text-sm font-medium">
-											{q.user?.name || 'Anonymous'}
-										</span>
-										<span className="text-xs text-muted-foreground">
-											{new Date(q.createdAt).toLocaleDateString()}
-										</span>
-									</div>
-								</div>
-							</CardHeader>
-							<CardContent className="pt-4 relative flex-grow">
-								<div className="absolute top-0 left-2 text-7xl leading-none opacity-10 dark:opacity-5 font-serif select-none text-primary">
-									&ldquo;
-								</div>
-								<blockquote className="text-lg leading-relaxed tracking-wide relative z-10">
-									<span className="font-serif italic [overflow-wrap:anywhere]">
+							<CardHeader className="grow">
+								<blockquote className="relative">
+									<span className="text-4xl text-primary/20 absolute -top-4 -left-2 font-serif select-none">
+										&ldquo;
+									</span>
+									<p className="text-xl font-serif leading-relaxed text-foreground/90 px-2 italic wrap-anywhere">
 										{q.quote}
+									</p>
+									<span className="text-4xl text-primary/20 absolute -bottom-8 -right-2 font-serif select-none">
+										&rdquo;
 									</span>
 								</blockquote>
-								<p className="text-sm text-muted-foreground text-right mt-4 font-medium tracking-wide [overflow-wrap:anywhere]">
-									— {q.author}
-								</p>
-								<div className="absolute bottom-0 right-2 text-7xl leading-none opacity-10 dark:opacity-5 font-serif select-none text-primary rotate-180">
-									&ldquo;
+								<div className="mt-6 text-right">
+									<cite className="text-sm font-medium text-muted-foreground not-italic wrap-anywhere">
+										— {q.author}
+									</cite>
 								</div>
-							</CardContent>
-							<CardFooter className="flex flex-col gap-2 py-4 border-t dark:border-gray-800 bg-gradient-to-b from-transparent to-muted/5 mt-auto">
-								<div className="flex items-center justify-between w-full">
+							</CardHeader>
+							<CardContent className="py-2 border-t border-border/50 bg-muted/20">
+								<div className="flex items-center justify-between w-full py-2">
 									<Likes
 										id={q.id.toString()}
 										likes={q.likes}
@@ -234,7 +216,25 @@ export default function Quotes({
 										</div>
 									)}
 								</div>
-							</CardFooter>
+								<div className="flex items-center gap-4 pb-2">
+									<Avatar className="size-9 border border-border/50">
+										<AvatarImage src={q.user?.image || ''} />
+										<AvatarFallback>{q.user?.name?.[0] || '?'}</AvatarFallback>
+									</Avatar>
+									<div className="flex flex-col">
+										<span className="text-sm font-semibold leading-none">
+											{q.user?.name || 'Anonymous'}
+										</span>
+										<span className="text-xs text-muted-foreground mt-1">
+											{new Date(q.createdAt).toLocaleDateString(undefined, {
+												year: 'numeric',
+												month: 'long',
+												day: 'numeric',
+											})}
+										</span>
+									</div>
+								</div>
+							</CardContent>
 						</Card>
 					))
 				)}
@@ -242,19 +242,23 @@ export default function Quotes({
 				{!isFilterLoading && quotes.length > 0 && (
 					<div
 						ref={observerTarget}
-						className="col-span-full flex justify-center py-8"
+						className="col-span-full flex justify-center py-6"
 					>
-						{isLoadingMore && (
+						{isLoadingMore ? (
 							<Loader2 className="size-8 animate-spin text-muted-foreground" />
+						) : (
+							<p className="text-muted-foreground text-sm italic">
+								&ldquo;you&apos;ve reached the end of the quotes.&ldquo;
+							</p>
 						)}
 					</div>
 				)}
 			</div>
 
-			<div className="text-center text-sm text-gray-500 dark:text-gray-400 bg-muted/5 py-6">
-				2025,{' '}
+			<div className="text-center text-sm text-gray-500 dark:text-gray-400 dark:bg-muted/5 bg-muted py-4">
+				&ldquo;2025,{' '}
 				<Link href="https://wolfey.me" target="_blank">
-					wolfey.me
+					wolfey.me&ldquo;
 				</Link>
 			</div>
 		</div>
