@@ -1,22 +1,38 @@
 'use client'
 import Delete from '@/components/DeleteQuote'
 import Likes from '@/components/Likes'
-import { useEffect, useState, useTransition, useCallback } from 'react'
+import { useEffect, useState, useTransition, useCallback, useRef } from 'react'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getFilteredData } from '@/app/actions'
+import { getData, getFilteredData } from '@/app/actions'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { authClient } from '@/lib/auth-client'
 import Header from './Header'
-import Footer from './Footer'
 import { Loader2 } from 'lucide-react'
+import Link from 'next/link'
 
-export default function Quotes({ data }: { data: Quote[] }) {
-	const [quotes, setQuotes] = useState<Quote[]>(data)
+export default function Quotes({
+	initialData,
+	initialCursor,
+	initialHasMore,
+}: {
+	initialData: Quote[]
+	initialCursor: number | null
+	initialHasMore: boolean
+}) {
+	const [quotes, setQuotes] = useState<Quote[]>(initialData)
 	const [isFilterLoading, startTransition] = useTransition()
 	const { data: session } = authClient.useSession()
 	const [mounted, setMounted] = useState(false)
+	const [cursor, setCursor] = useState<number | null>(initialCursor)
+	const [hasMore, setHasMore] = useState(initialHasMore)
+	const [isLoadingMore, setIsLoadingMore] = useState(false)
+	const [currentFilters, setCurrentFilters] = useState<{
+		filterType: FilterOption
+		sortBy: SortOption
+	} | null>(null)
+	const observerTarget = useRef<HTMLDivElement>(null)
 
 	const updateQuoteLikes = (quoteId: string, newLikes: number) => {
 		setQuotes(prevQuotes =>
@@ -34,24 +50,55 @@ export default function Quotes({ data }: { data: Quote[] }) {
 		setQuotes(prevQuotes => [newQuote, ...prevQuotes])
 	}
 
+	const loadMore = useCallback(async () => {
+		if (!hasMore || isLoadingMore) return
+
+		setIsLoadingMore(true)
+		try {
+			let result
+			if (currentFilters) {
+				result = await getFilteredData(
+					{ filterType: currentFilters.filterType },
+					currentFilters.sortBy,
+					cursor || undefined
+				)
+			} else {
+				result = await getData(cursor || undefined)
+			}
+
+			setQuotes(prev => [...prev, ...(result.data as Quote[])])
+			setCursor(result.nextCursor)
+			setHasMore(result.hasMore)
+		} catch (error) {
+			console.error('Error loading more quotes:', error)
+		} finally {
+			setIsLoadingMore(false)
+		}
+	}, [cursor, hasMore, isLoadingMore, currentFilters])
+
 	const handleFilterChange = useCallback(
 		async (filters: { filterType: FilterOption; sortBy: SortOption }) => {
 			startTransition(async () => {
 				try {
-					const filteredData = await getFilteredData(
+					setCurrentFilters(filters)
+					const result = await getFilteredData(
 						{
 							filterType: filters.filterType,
 						},
 						filters.sortBy
 					)
-					setQuotes(filteredData as Quote[])
+					setQuotes(result.data as Quote[])
+					setCursor(result.nextCursor)
+					setHasMore(result.hasMore)
 				} catch (error) {
 					console.error('Error applying filters:', error)
-					setQuotes(data)
+					setQuotes(initialData)
+					setCursor(initialCursor)
+					setHasMore(initialHasMore)
 				}
 			})
 		},
-		[data]
+		[initialData, initialCursor, initialHasMore]
 	)
 
 	useEffect(() => {
@@ -64,11 +111,37 @@ export default function Quotes({ data }: { data: Quote[] }) {
 		}
 
 		applyInitialFilters()
-	}, [data, handleFilterChange])
+	}, [handleFilterChange])
 
 	useEffect(() => {
 		setMounted(true)
 	}, [])
+
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			entries => {
+				if (
+					entries[0].isIntersecting &&
+					hasMore &&
+					!isLoadingMore &&
+					!isFilterLoading
+				) {
+					loadMore()
+				}
+			},
+			{ threshold: 0.1 }
+		)
+
+		if (observerTarget.current) {
+			observer.observe(observerTarget.current)
+		}
+
+		return () => {
+			if (observerTarget.current) {
+				observer.unobserve(observerTarget.current)
+			}
+		}
+	}, [hasMore, isLoadingMore, isFilterLoading, loadMore])
 
 	if (!mounted) {
 		return (
@@ -165,9 +238,25 @@ export default function Quotes({ data }: { data: Quote[] }) {
 						</Card>
 					))
 				)}
+
+				{!isFilterLoading && quotes.length > 0 && (
+					<div
+						ref={observerTarget}
+						className="col-span-full flex justify-center py-8"
+					>
+						{isLoadingMore && (
+							<Loader2 className="size-8 animate-spin text-muted-foreground" />
+						)}
+					</div>
+				)}
 			</div>
 
-			<Footer />
+			<div className="text-center text-sm text-gray-500 dark:text-gray-400 bg-muted/5 py-6">
+				2025,{' '}
+				<Link href="https://wolfey.me" target="_blank">
+					wolfey.me
+				</Link>
+			</div>
 		</div>
 	)
 }

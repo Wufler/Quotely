@@ -4,7 +4,13 @@ import { connection } from 'next/server'
 
 export default async function Home() {
 	await connection()
-	const data = await getData()
+	const result = await getData()
 
-	return <Quotes data={data as Quote[]} />
+	return (
+		<Quotes
+			initialData={result.data as Quote[]}
+			initialCursor={result.nextCursor}
+			initialHasMore={result.hasMore}
+		/>
+	)
 }

@@ -17,7 +17,7 @@ import {
 	DialogTrigger,
 	DialogFooter,
 } from '@/components/ui/dialog'
-import { MessageCirclePlus, Sparkles, QuoteIcon } from 'lucide-react'
+import { MessageCirclePlus, Loader2, Quote } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
@@ -38,25 +38,37 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 			const authorText = formData.get('author') as string
 
 			startTransition(async () => {
-				let id = session?.user?.id
+				try {
+					let id = session?.user?.id
 
-				if (!id) {
-					await anonymousSignIn()
-					const updatedSession = await authClient.getSession()
-					id = updatedSession?.data?.user?.id
-				}
-
-				const newQuote = await saveData(quoteText, authorText, id as string)
-				if (newQuote) {
-					toast.success('✨ Quote added successfully!')
-					if (onQuoteAdded) {
-						onQuoteAdded(newQuote as Quote)
+					if (!id) {
+						await anonymousSignIn()
+						const updatedSession = await authClient.getSession()
+						id = updatedSession?.data?.user?.id
 					}
-					setOpen(false)
-					setAuthor('')
-					setQuote('')
-				} else {
-					toast.error('Failed to add quote. Please try again.')
+
+					const newQuote = await saveData(quoteText, authorText, id as string)
+					if (newQuote) {
+						toast.success('✨ Quote added successfully!')
+						if (onQuoteAdded) {
+							onQuoteAdded(newQuote as Quote)
+						}
+						setOpen(false)
+						setAuthor('')
+						setQuote('')
+					} else {
+						toast.error('Failed to add quote. Please try again.')
+					}
+				} catch (error) {
+					if (
+						error instanceof Error &&
+						error.message.includes('Rate limit exceeded')
+					) {
+						toast.error(error.message)
+					} else {
+						toast.error('Failed to add quote. Please try again.')
+					}
+					console.error(error)
 				}
 			})
 		} catch (error) {
@@ -80,7 +92,7 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 				<DialogContent className="sm:max-w-[500px]">
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2 text-xl">
-							<Sparkles className="size-5 text-primary" />
+							<Quote className="size-5 text-primary" />
 							Create an Inspiring Quote
 						</DialogTitle>
 						<div>
@@ -119,7 +131,6 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 										htmlFor="quote"
 										className="text-sm font-medium flex items-center gap-2"
 									>
-										<QuoteIcon className="h-4 w-4 text-primary" />
 										The Quote
 									</Label>
 									<div className="relative">
@@ -179,14 +190,11 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 									>
 										{isPending ? (
 											<>
-												<Sparkles className="size-4 animate-spin text-yellow-500" />
+												<Loader2 className="size-4 animate-spin" />
 												Adding...
 											</>
 										) : (
-											<>
-												<Sparkles className="size-4" />
-												Publish Quote
-											</>
+											<>Publish Quote</>
 										)}
 									</Button>
 								</DialogFooter>

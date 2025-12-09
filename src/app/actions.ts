@@ -5,21 +5,69 @@ import { Prisma } from "@/generated/prisma/client"
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 
-export async function getData() {
-    return await prisma.quotes.findMany({
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000
+const RATE_LIMIT_MAX_REQUESTS = 3
+
+const rateLimitStore = new Map<string, number[]>()
+
+function checkRateLimit(userId: string): { allowed: boolean; retryAfter?: number } {
+    const now = Date.now()
+    const userTimestamps = rateLimitStore.get(userId) || []
+
+    const recentTimestamps = userTimestamps.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW)
+
+    if (recentTimestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
+        const oldestTimestamp = recentTimestamps[0]
+        const retryAfter = Math.ceil((oldestTimestamp + RATE_LIMIT_WINDOW - now) / 1000)
+        return { allowed: false, retryAfter }
+    }
+
+    recentTimestamps.push(now)
+    rateLimitStore.set(userId, recentTimestamps)
+
+    return { allowed: true }
+}
+
+export async function getData(cursor?: number, limit: number = 12) {
+    const quotes = await prisma.quotes.findMany({
+        take: limit + 1,
+        ...(cursor && {
+            skip: 1,
+            cursor: {
+                id: cursor
+            }
+        }),
         include: {
             user: true
+        },
+        orderBy: {
+            createdAt: 'desc'
         }
     })
+
+    const hasMore = quotes.length > limit
+    const data = hasMore ? quotes.slice(0, -1) : quotes
+    const nextCursor = hasMore ? data[data.length - 1].id : null
+
+    return {
+        data,
+        nextCursor,
+        hasMore
+    }
 }
 
 export async function saveData(quote: string, author: string, id: string) {
     const verification = await checkBotId();
-    
+
     if (verification.isBot) {
         throw new Error('Access denied');
     }
-    
+
+    const rateCheck = checkRateLimit(id)
+    if (!rateCheck.allowed) {
+        throw new Error(`Too many quotes created. Please try again later.`);
+    }
+
     try {
         const newQuote = await prisma.quotes.create({
             data: {
@@ -41,11 +89,11 @@ export async function saveData(quote: string, author: string, id: string) {
 
 export async function deleteData(id: number) {
     const verification = await checkBotId();
-    
+
     if (verification.isBot) {
         throw new Error('Access denied');
     }
-    
+
     try {
         await prisma.quotes.delete({
             where: { id }
@@ -59,11 +107,11 @@ export async function deleteData(id: number) {
 
 export async function incrementLikes(id: number, userId: string) {
     const verification = await checkBotId();
-    
+
     if (verification.isBot) {
         throw new Error('Access denied');
     }
-    
+
     try {
         return await prisma.$transaction(async (tx) => {
             const existingVote = await tx.quoteLike.findUnique({
@@ -122,11 +170,11 @@ export async function incrementLikes(id: number, userId: string) {
 
 export async function decrementLikes(id: number, userId: string) {
     const verification = await checkBotId();
-    
+
     if (verification.isBot) {
         throw new Error('Access denied');
     }
-    
+
     try {
         return await prisma.$transaction(async (tx) => {
             const existingVote = await tx.quoteLike.findUnique({
@@ -183,8 +231,15 @@ export async function decrementLikes(id: number, userId: string) {
     }
 }
 
-export async function getFilteredData(filter: FilterParams, sort: SortOption) {
+export async function getFilteredData(filter: FilterParams, sort: SortOption, cursor?: number, limit: number = 12) {
     const query: Prisma.QuotesFindManyArgs = {
+        take: limit + 1,
+        ...(cursor && {
+            skip: 1,
+            cursor: {
+                id: cursor
+            }
+        }),
         include: {
             user: true
         },
@@ -228,16 +283,25 @@ export async function getFilteredData(filter: FilterParams, sort: SortOption) {
             query.orderBy = { createdAt: 'desc' }
     }
 
-    return await prisma.quotes.findMany(query)
+    const quotes = await prisma.quotes.findMany(query)
+    const hasMore = quotes.length > limit
+    const data = hasMore ? quotes.slice(0, -1) : quotes
+    const nextCursor = hasMore ? data[data.length - 1].id : null
+
+    return {
+        data,
+        nextCursor,
+        hasMore
+    }
 }
 
 export async function deleteAccount(userId: string) {
     const verification = await checkBotId();
-    
+
     if (verification.isBot) {
         throw new Error('Access denied');
     }
-    
+
     await prisma.user.delete({
         where: { id: userId }
     })

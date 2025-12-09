@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String      @id
   name          String
   email         String
   emailVerified Boolean
@@ -18,9 +18,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
   quotes        Quotes[]
-
-  isAnonymous Boolean?
-  QuoteLike   QuoteLike[]
+  isAnonymous   Boolean?
+  QuoteLike     QuoteLike[]
 
   @@unique([email])
   @@map("user")
