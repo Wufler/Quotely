@@ -59,10 +59,12 @@ export default function Quotes({
 				result = await getFilteredData(
 					{ filterType: currentFilters.filterType },
 					currentFilters.sortBy,
-					cursor || undefined
+					cursor || undefined,
+					12,
+					session?.user?.id
 				)
 			} else {
-				result = await getData(cursor || undefined)
+				result = await getData(cursor || undefined, 12, session?.user?.id)
 			}
 
 			setQuotes(prev => [...prev, ...(result.data as Quote[])])
@@ -73,7 +75,7 @@ export default function Quotes({
 		} finally {
 			setIsLoadingMore(false)
 		}
-	}, [cursor, hasMore, isLoadingMore, currentFilters])
+	}, [cursor, hasMore, isLoadingMore, currentFilters, session?.user?.id])
 
 	const handleFilterChange = useCallback(
 		async (filters: { filterType: FilterOption; sortBy: SortOption }) => {
@@ -84,7 +86,10 @@ export default function Quotes({
 						{
 							filterType: filters.filterType,
 						},
-						filters.sortBy
+						filters.sortBy,
+						undefined,
+						12,
+						session?.user?.id
 					)
 					setQuotes(result.data as Quote[])
 					setCursor(result.nextCursor)
@@ -97,7 +102,7 @@ export default function Quotes({
 				}
 			})
 		},
-		[initialData, initialCursor, initialHasMore]
+		[initialData, initialCursor, initialHasMore, session?.user?.id]
 	)
 
 	useEffect(() => {
@@ -209,6 +214,7 @@ export default function Quotes({
 										onLikesUpdate={newLikes =>
 											updateQuoteLikes(q.id.toString(), newLikes)
 										}
+										initialUserVote={q.userLikes?.[0]?.value || 0}
 									/>
 									{session?.user?.id === q.userId && (
 										<div className="flex items-center gap-2">

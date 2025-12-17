@@ -8,7 +8,7 @@ import { verifyAuthentication } from './utils/auth'
 import { checkRateLimit } from './utils/rate-limit'
 import { sanitizeString, validateQuoteInput } from './utils/validation'
 
-export async function getData(cursor?: number, limit: number = 12) {
+export async function getData(cursor?: number, limit: number = 12, userId?: string) {
     if (limit < 1 || limit > 100) {
         throw new Error('Invalid limit parameter')
     }
@@ -25,7 +25,12 @@ export async function getData(cursor?: number, limit: number = 12) {
             }
         }),
         include: {
-            user: true
+            user: true,
+            userLikes: userId ? {
+                where: {
+                    userId: userId
+                }
+            } : false
         },
         orderBy: {
             createdAt: 'desc'
@@ -126,7 +131,7 @@ export async function deleteData(id: number) {
     }
 }
 
-export async function getFilteredData(filter: FilterParams, sort: SortOption, cursor?: number, limit: number = 12) {
+export async function getFilteredData(filter: FilterParams, sort: SortOption, cursor?: number, limit: number = 12, userId?: string) {
     if (limit < 1 || limit > 100) {
         throw new Error('Invalid limit parameter');
     }
@@ -156,7 +161,12 @@ export async function getFilteredData(filter: FilterParams, sort: SortOption, cu
             }
         }),
         include: {
-            user: true
+            user: true,
+            userLikes: userId ? {
+                where: {
+                    userId: userId
+                }
+            } : false
         },
         where: {},
         orderBy: {}

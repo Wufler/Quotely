@@ -10,13 +10,15 @@ export default function Likes({
 	id,
 	likes,
 	onLikesUpdate,
+	initialUserVote = 0,
 }: {
 	id: string
 	likes: number
 	onLikesUpdate: (newLikes: number) => void
+	initialUserVote?: number
 }) {
 	const { data: session } = authClient.useSession()
-	const [userVote, setUserVote] = useState(0)
+	const [userVote, setUserVote] = useState(initialUserVote)
 
 	const handleLike = async () => {
 		if (!session?.user?.id) {
@@ -38,6 +40,7 @@ export default function Likes({
 			}
 		} catch (error) {
 			toast.error('Failed to like quote. Please try again later.')
+			console.log(error)
 		}
 	}
 
@@ -61,6 +64,7 @@ export default function Likes({
 			}
 		} catch (error) {
 			toast.error('Failed to dislike quote. Please try again later.')
+			console.log(error)
 		}
 	}
 
