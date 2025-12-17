@@ -18,7 +18,6 @@ import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
-	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
@@ -232,7 +231,7 @@ export default function Profile() {
 							Sign In
 						</Button>
 					</DialogTrigger>
-					<DialogContent className="sm:max-w-[400px] p-6">
+					<DialogContent className="sm:max-w-100 p-6">
 						<DialogHeader>
 							<DialogTitle className="font-bold tracking-tight">Sign In</DialogTitle>
 							<DialogDescription>
@@ -273,11 +272,6 @@ export default function Profile() {
 								Anonymous
 							</Button>
 						</div>
-						<DialogFooter className="sm:justify-center">
-							<p className="text-xs text-center text-muted-foreground px-4">
-								You can continue as Anonymous without signing in
-							</p>
-						</DialogFooter>
 					</DialogContent>
 				</Dialog>
 			)}

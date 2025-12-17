@@ -162,13 +162,13 @@ export default function Quotes({
 						{[...Array(quotes.length)].map((_, i) => (
 							<Card key={i} className="bg-card">
 								<CardHeader>
-									<Skeleton className="h-4 w-[250px]" />
+									<Skeleton className="h-4 w-62.5" />
 								</CardHeader>
 								<CardContent>
 									<Skeleton className="h-20 w-full" />
 								</CardContent>
 								<CardFooter>
-									<Skeleton className="h-4 w-[200px]" />
+									<Skeleton className="h-4 w-62.5" />
 								</CardFooter>
 							</Card>
 						))}
@@ -178,9 +178,9 @@ export default function Quotes({
 						No quotes found matching your filters!
 					</p>
 				) : (
-					quotes.map(q => (
+					quotes.map((q, index) => (
 						<Card
-							key={q.id}
+							key={`${q.id}-${index}`}
 							className="flex flex-col h-full border-border/50 bg-card/50 py-0 pt-8"
 						>
 							<CardHeader className="grow">
@@ -255,12 +255,20 @@ export default function Quotes({
 				)}
 			</div>
 
-			<div className="text-center text-sm text-gray-500 dark:text-gray-400 dark:bg-muted/5 bg-muted py-4">
-				&ldquo;2025,{' '}
-				<Link href="https://wolfey.me" target="_blank">
-					wolfey.me&ldquo;
-				</Link>
-			</div>
+			<footer className="text-center text-sm text-gray-500 dark:text-gray-400 dark:bg-muted/5 bg-muted py-4 border-t border-border/30">
+				<div className="flex flex-col items-center justify-center gap-2">
+					<span>
+						2025{' '}
+						<Link
+							href="https://wolfey.me"
+							target="_blank"
+							className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+						>
+							wolfey.me
+						</Link>
+					</span>
+				</div>
+			</footer>
 		</div>
 	)
 }

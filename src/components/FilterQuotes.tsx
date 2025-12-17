@@ -59,7 +59,7 @@ export default function QuoteFilters({
 					handleFilterChange({ filterType: value })
 				}
 			>
-				<SelectTrigger className="w-[140px]">
+				<SelectTrigger className="w-35">
 					<SelectValue placeholder="Filter by" />
 				</SelectTrigger>
 				<SelectContent>
@@ -73,7 +73,7 @@ export default function QuoteFilters({
 				value={filters.sortBy}
 				onValueChange={(value: SortOption) => handleFilterChange({ sortBy: value })}
 			>
-				<SelectTrigger className="w-[140px]">
+				<SelectTrigger className="w-35">
 					<SelectValue placeholder="Sort by" />
 				</SelectTrigger>
 				<SelectContent>

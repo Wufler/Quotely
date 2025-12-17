@@ -24,16 +24,20 @@ export default function Likes({
 			return
 		}
 
-		const result = await incrementLikes(Number(id), session.user.id)
-		if (result?.likes !== undefined) {
-			onLikesUpdate(result.likes)
-			if (userVote === 1) {
-				setUserVote(0)
-			} else if (userVote === -1) {
-				setUserVote(1)
-			} else {
-				setUserVote(1)
+		try {
+			const result = await incrementLikes(Number(id), session.user.id)
+			if (result?.likes !== undefined) {
+				onLikesUpdate(result.likes)
+				if (userVote === 1) {
+					setUserVote(0)
+				} else if (userVote === -1) {
+					setUserVote(1)
+				} else {
+					setUserVote(1)
+				}
 			}
+		} catch (error) {
+			toast.error('Failed to like quote. Please try again later.')
 		}
 	}
 
@@ -43,16 +47,20 @@ export default function Likes({
 			return
 		}
 
-		const result = await decrementLikes(Number(id), session.user.id)
-		if (result?.likes !== undefined) {
-			onLikesUpdate(result.likes)
-			if (userVote === -1) {
-				setUserVote(0)
-			} else if (userVote === 1) {
-				setUserVote(-1)
-			} else {
-				setUserVote(-1)
+		try {
+			const result = await decrementLikes(Number(id), session.user.id)
+			if (result?.likes !== undefined) {
+				onLikesUpdate(result.likes)
+				if (userVote === -1) {
+					setUserVote(0)
+				} else if (userVote === 1) {
+					setUserVote(-1)
+				} else {
+					setUserVote(-1)
+				}
 			}
+		} catch (error) {
+			toast.error('Failed to dislike quote. Please try again later.')
 		}
 	}
 

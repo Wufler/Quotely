@@ -54,7 +54,7 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 						setAuthor('')
 						setQuote('')
 					} else {
-						toast.error('Failed to add quote. Please try again.')
+						toast.error('Failed to add quote. Please try again later.')
 					}
 				} catch (error) {
 					if (
@@ -63,14 +63,14 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 					) {
 						toast.error(error.message)
 					} else {
-						toast.error('Failed to add quote. Please try again.')
+						toast.error('Failed to add quote. Please try again later.')
 					}
 					console.error(error)
 				}
 			})
 		} catch (error) {
 			console.error(error)
-			toast.error('Failed to add quote. Please try again.')
+			toast.error('Failed to add quote. Please try again later.')
 		}
 	}
 
@@ -86,7 +86,7 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 						<span className="sr-only">Create new quote</span>
 					</Button>
 				</DialogTrigger>
-				<DialogContent className="sm:max-w-[500px]">
+				<DialogContent className="sm:max-w-125">
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2 text-xl">
 							<Quote className="size-5 text-primary" />
@@ -142,7 +142,7 @@ export default function CreateQuote({ onQuoteAdded }: CreateQuoteProps) {
 											value={quote}
 											required
 											onChange={e => setQuote(e.target.value)}
-											className="min-h-[120px] transition-all duration-200 focus:ring-2 focus:ring-primary/20 resize-none text-black dark:text-white pl-6 pr-6 wrap-anywhere"
+											className="min-h-30 max-h-72 transition-all duration-200 focus:ring-2 focus:ring-primary/20 resize-none text-black dark:text-white pl-6 pr-6 wrap-anywhere"
 										/>
 										<span className="absolute right-3 top-3 text-muted-foreground">
 											&rdquo;
